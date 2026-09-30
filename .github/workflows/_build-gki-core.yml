@@ -324,6 +324,21 @@ jobs:
             sed -i '/#include <trace\/hooks\/blk.h>/a #include <trace/hooks/fs.h>' ./fs/namespace.c
           fi
 
+      - name: Fix September Date Arithmetic
+        run: |
+          BUILD_UTILS="kernel/build/kernel/build_utils.sh"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("kernel/build/kernel/build_utils.sh")
+          source = path.read_text()
+          old = "date +'%m') + 3"
+          new = "10#$(date +'%m')) + 3"
+          if old in source:
+              path.write_text(source.replace(old, new, 1))
+          PY
+          grep -n "local spl_month" "$BUILD_UTILS"
+
       - name: Integrate KernelSU
         run: |
           cd kernel
